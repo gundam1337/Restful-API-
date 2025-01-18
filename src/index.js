@@ -28,6 +28,8 @@ const pool = new Pool({
 });
 
 // Add this before connectWithRetry
+console.log('Starting application...');
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 console.log("Database URL:", process.env.DATABASE_URL ? "Present" : "Missing");
 
 const connectWithRetry = async () => {
