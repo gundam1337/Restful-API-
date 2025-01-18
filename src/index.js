@@ -12,10 +12,6 @@ const ignoredRoutes = require("./routes/ignoredRoutes");
 const connectedRoutes = require("./routes/connectedRoutes");
 const updateStatusRoutes = require("./routes/updateStatusRoutes");
 
-const config = require("./config/config");
-
-// Add this line
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -25,19 +21,17 @@ app.use(express.json());
 
 // Database configuration
 const pool = new Pool({
-  connectionString: config.database.url,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false
 });
 
 // Function to try database connection
 const connectWithRetry = async () => {
   try {
-    await pool.query("SELECT NOW()");
+    await pool.connect();
     console.log("Database connected successfully");
-    console.log("Database URL:", process.env.DATABASE_URL); // Add this to debug
   } catch (err) {
     console.error("Database connection error:", err);
     console.log("Retrying in 5 seconds...");
@@ -45,6 +39,7 @@ const connectWithRetry = async () => {
   }
 };
 
+// Routes
 app.use("/", statusRoutes);
 app.use("/", trustedRoutes);
 app.use("/", trustingRoutes);
@@ -60,6 +55,9 @@ app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
   connectWithRetry();
 });
+
+// Export pool for use in route handlers
+module.exports = { pool };
 
 // Error handling
 process.on("unhandledRejection", (err) => {
