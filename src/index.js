@@ -22,21 +22,27 @@ app.use(express.json());
 // Database configuration
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? {
-          rejectUnauthorized: false,
-        }
-      : false,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-// Function to try database connection
+// Add this before connectWithRetry
+console.log("Database URL:", process.env.DATABASE_URL ? "Present" : "Missing");
+
 const connectWithRetry = async () => {
   try {
+    console.log("Attempting to connect to database...");
     await pool.connect();
     console.log("Database connected successfully");
   } catch (err) {
-    console.error("Database connection error:", err);
+    console.error("Database connection error details:", {
+      code: err.code,
+      errno: err.errno,
+      syscall: err.syscall,
+      address: err.address,
+      port: err.port,
+    });
     console.log("Retrying in 5 seconds...");
     setTimeout(connectWithRetry, 5000);
   }
