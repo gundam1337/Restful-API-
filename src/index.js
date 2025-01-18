@@ -23,14 +23,16 @@ const config = require("./config/config");
 
 // Database configuration
 const pool = new Pool({
-  connectionString: config.database.url,
-  ssl: config.database.ssl,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-// Add this before connectWithRetry
-console.log("Starting application...");
+console.log("=== Environment Variables ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
-console.log("Database URL:", process.env.DATABASE_URL ? "Present" : "Missing");
+console.log("PORT:", process.env.PORT);
 
 const connectWithRetry = async () => {
   try {
