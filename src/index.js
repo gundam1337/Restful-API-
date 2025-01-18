@@ -19,17 +19,17 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+const config = require("./config/config");
+
 // Database configuration
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  connectionString: config.database.url,
+  ssl: config.database.ssl,
 });
 
 // Add this before connectWithRetry
-console.log('Starting application...');
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log("Starting application...");
+console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
 console.log("Database URL:", process.env.DATABASE_URL ? "Present" : "Missing");
 
 const connectWithRetry = async () => {
