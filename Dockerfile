@@ -1,13 +1,18 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
+# Copy package files
 COPY package*.json ./
 
+# Install dependencies
 RUN npm install
 
+# Copy the entire src directory
+COPY src/ ./src/
+
+# Copy other necessary files
 COPY . .
 
-EXPOSE 3000
-
+# Start the application
 CMD ["npm", "start"]

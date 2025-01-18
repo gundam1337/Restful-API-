@@ -12,7 +12,7 @@ const ignoredRoutes = require("./routes/ignoredRoutes");
 const connectedRoutes = require("./routes/connectedRoutes");
 const updateStatusRoutes = require("./routes/updateStatusRoutes");
 
-const config = require("./config");
+const config = require("./config/config");
 
 // Add this line
 
