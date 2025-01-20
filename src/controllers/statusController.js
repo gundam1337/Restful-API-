@@ -1,12 +1,11 @@
-const { Pool } = require('pg');
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-});
+const pool = require('../../db');
 
 const checkStatus = async (req, res) => {
     const strangerId = req.params.strangerId;
-    const userId = 1; // Hardcoded for testing
+    const userId = req.testUserId;
+
+    console.log("User ID:", userId);
+   
 
     try {
         // Validate input
@@ -22,9 +21,9 @@ const checkStatus = async (req, res) => {
         // Log the inputs for debugging
         console.log(`Checking status between user ${userId} and stranger ${strangerId}`);
 
-        // Query to check status with correct case sensitivity
+        // Updated query with new table name and column name
         const query = `
-            SELECT tstatus 
+            SELECT status 
             FROM "user_trust" 
             WHERE ((user1 = $1 AND user2 = $2)
                 OR (user2 = $1 AND user1 = $2))
@@ -46,7 +45,7 @@ const checkStatus = async (req, res) => {
         // Return the found status
         return res.json({
             success: true,
-            status: result.rows[0].tstatus
+            status: result.rows[0].status  // Updated from tstatus to status
         });
 
     } catch (error) {

@@ -1,9 +1,9 @@
 const config = {
   database: {
-    url: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/trustdb',
-    ssl: process.env.NODE_ENV === 'production' ? {
+    url: process.env.DATABASE_URL || 'postgresql://postgres:AIKON_2@167.172.66.102:5432/aikon',
+    ssl: {
       rejectUnauthorized: false
-    } : false
+    }
   },
   server: {
     port: process.env.PORT || 3000

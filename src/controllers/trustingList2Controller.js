@@ -1,45 +1,51 @@
-const { Pool } = require('pg');
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-});
+const pool = require('../../db'); // Use the shared pool instance
 
 const getTrustingList2 = async (req, res) => {
-    const userId = 1; // Hardcoded for testing
+    const userId = req.testUserId; // Using the test middleware
+    console.log("User ID:", userId);
 
     try {
-        // Query to get users who trust me but aren't ignored by me
+        // Updated query to match the specification using EXCEPT
         const query = `
-            SELECT u.* 
+            SELECT 
+                u.id,
+                u.username,
+                u.name,
+                u.phone,
+                u.bio,
+                u.city,
+                u.company_name,
+                u.email
             FROM "user_trust" ut
-            JOIN "user" u ON ut.user1 = u.userid
+            JOIN "up_users" u ON ut.user1 = u.id
             WHERE ut.user2 = $1 
-            AND ut.tstatus = 'trusts'
+            AND ut.status = 'trusts'
+            AND u.blocked = false
             AND ut.user1 NOT IN (
-                SELECT ut2.user2
-                FROM "user_trust" ut2
-                WHERE ut2.user1 = $1
-                AND ut2.tstatus = 'ignored'
+                SELECT user2
+                FROM "user_trust"
+                WHERE user1 = $1
+                AND status = 'ignored'
             )
         `;
 
         const result = await pool.query(query, [userId]);
 
-        // Log the query result for debugging
         console.log('Users who trust me (not ignored) found:', result.rows.length);
 
-        // Transform the data to match the expected user object format
         const trustingUsers = result.rows.map(user => ({
             user: {
-                id: user.userid,
+                id: user.id,
                 username: user.username,
-                name: user.realname,
+                name: user.name,
                 phone: user.phone,
-                profileImage: user.profileimage
+                email: user.email,
+                bio: user.bio,
+                city: user.city,
+                companyName: user.company_name
             }
         }));
 
-        // Return the list of trusting users
         return res.json({
             success: true,
             users: trustingUsers
