@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
-const config = require("./config/config");
+const { config, checkDatabaseTables } = require("./config/config");
 
 const userRoutes = require("./routes/userRoutes");
 const trustRoutes = require("./routes/trustRoutes");
@@ -112,6 +112,49 @@ app.get("/set-test-user/:userId", (req, res) => {
     success: true,
     message: `Test user ID set to ${newUserId}`,
   });
+});
+
+// diagnostic
+app.get('/diagnostic', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    
+    // Check connection
+    await client.query('SELECT NOW()');
+    
+    // Get all tables
+    const tablesResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+    
+    // Check up_users table specifically
+    const upUsersResult = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'up_users'
+      );
+    `);
+    
+    client.release();
+    
+    res.json({
+      success: true,
+      currentTime: new Date(),
+      databaseUrl: config.database.url.replace(/:[^:]*@/, ':****@'),
+      tables: tablesResult.rows,
+      hasUpUsersTable: upUsersResult.rows[0].exists
+    });
+  } catch (err) {
+    console.error('Diagnostic error:', err);
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      stack: err.stack
+    });
+  }
 });
 
 // Routes
