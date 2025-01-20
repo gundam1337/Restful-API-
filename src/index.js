@@ -3,6 +3,7 @@ const cors = require("cors");
 const { Pool } = require("pg");
 
 const config = require("./config/config");
+
 const userRoutes = require("./routes/userRoutes");
 const trustRoutes = require("./routes/trustRoutes");
 const statusRoutes = require("./routes/statusRoutes");
@@ -92,14 +93,6 @@ const addTestUser = (req, res, next) => {
   next();
 };
 
-// Test POST route - add this before your other routes
-// app.post("/test/:id", async (req, res) => {
-//   res.json({
-//     success: true,
-//     message: "Post working!",
-//     id: req.params.id,
-//   });
-// });
 
 // New route to set test user ID
 app.get("/set-test-user/:userId", (req, res) => {

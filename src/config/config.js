@@ -1,6 +1,14 @@
+const constructDatabaseUrl = () => {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
+  
+  return `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/aikon`;
+};
+
 const config = {
   database: {
-    url: process.env.DATABASE_URL || 'postgresql://postgres:AIKON_2@167.172.66.102:5432/aikon',
+    url: constructDatabaseUrl(),
     ssl: {
       rejectUnauthorized: false
     }
