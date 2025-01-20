@@ -1,55 +1,59 @@
-const { Pool } = require('pg');
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-});
+const pool = require("../../db"); // Use the shared pool instance
 
 const getBlockedList = async (req, res) => {
-    const userId = 1; // Hardcoded for testing
+  const userId = req.testUserId; // Using the test middleware
 
-    try {
-        // Query to get all users blocked by the current user
-        const query = `
-            SELECT u.* 
+  try {
+    // Updated query to match your schema
+    const query = `
+            SELECT 
+                u.id,
+                u.username,
+                u.name,
+                u.phone,
+                u.bio,
+                u.city,
+                u.company_name,
+                u.email
             FROM "user_trust" ut
-            JOIN "user" u ON ut.user2 = u.userid
+            JOIN "up_users" u ON ut.user2 = u.id
             WHERE ut.user1 = $1 
-            AND ut.tstatus = 'blocked'
+            AND ut.status = 'blocked'
+            AND u.blocked = false
         `;
 
-        const result = await pool.query(query, [userId]);
+    const result = await pool.query(query, [userId]);
 
-        // Log the query result for debugging
-        console.log('Blocked users found:', result.rows.length);
+    console.log("Blocked users found:", result.rows.length);
 
-        // Transform the data to match the expected user object format
-        const blockedUsers = result.rows.map(user => ({
-            user: {
-                id: user.userid,
-                username: user.username,
-                name: user.realname,
-                phone: user.phone,
-                profileImage: user.profileimage
-            }
-        }));
+    const blockedUsers = result.rows.map((user) => ({
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        bio: user.bio,
+        city: user.city,
+        companyName: user.company_name,
+      },
+    }));
 
-        // Return the list of blocked users
-        return res.json({
-            success: true,
-            users: blockedUsers
-        });
-
-    } catch (error) {
-        console.error('Error getting blocked users list:', error);
-        return res.status(500).json({
-            success: false,
-            error: {
-                message: "Internal server error while fetching blocked users"
-            }
-        });
-    }
+    return res.json({
+      success: true,
+      users: blockedUsers,
+    });
+  } catch (error) {
+    console.error("Error getting blocked users list:", error);
+    return res.status(500).json({
+      success: false,
+      error: {
+        message: "Internal server error while fetching blocked users",
+      },
+    });
+  }
 };
 
 module.exports = {
-    getBlockedList
+  getBlockedList,
 };

@@ -1,7 +1,7 @@
 const express = require("express");
-const router = express.Router();
 const cors = require("cors");
 const { Pool } = require("pg");
+
 const config = require("./config/config");
 const userRoutes = require("./routes/userRoutes");
 const trustRoutes = require("./routes/trustRoutes");
@@ -9,14 +9,13 @@ const statusRoutes = require("./routes/statusRoutes");
 const trustedRoutes = require("./routes/trustedRoutes");
 const trustingRoutes = require("./routes/trustingRoutes");
 const trustingList2Routes = require("./routes/trustingList2Routes");
-// const blockedRoutes = require("./routes/blockedRoutes");
-// const blockedMeRoutes = require("./routes/blockedMeRoutes");
-// const ignoredRoutes = require("./routes/ignoredRoutes");
-// const connectedRoutes = require("./routes/connectedRoutes");
-// const updateStatusRoutes = require("./routes/updateStatusRoutes");
+const blockedRoutes = require("./routes/blockedRoutes");
+const blockedMeRoutes = require("./routes/blockedMeRoutes");
+const ignoredRoutes = require("./routes/ignoredRoutes");
+const connectedRoutes = require("./routes/connectedRoutes");
+const updateStatusRoutes = require("./routes/updateStatusRoutes");
 
-const { setTestUserId, getTestUserId } = require('./test/testStore');
-
+const { setTestUserId, getTestUserId } = require("./test/testStore");
 
 const app = express();
 const port = config.server.port;
@@ -87,29 +86,39 @@ app.get("/tables", async (req, res) => {
   }
 });
 
+//for the testing
 const addTestUser = (req, res, next) => {
-    req.testUserId = getTestUserId();
-    next();
+  req.testUserId = getTestUserId();
+  next();
 };
 
-// New route to set test user ID
-app.get('/set-test-user/:userId', (req, res) => {
-    const newUserId = parseInt(req.params.userId);
-    
-    if (isNaN(newUserId)) {
-        return res.status(400).json({
-            success: false,
-            error: {
-                message: "Invalid user ID provided"
-            }
-        });
-    }
+// Test POST route - add this before your other routes
+// app.post("/test/:id", async (req, res) => {
+//   res.json({
+//     success: true,
+//     message: "Post working!",
+//     id: req.params.id,
+//   });
+// });
 
-    setTestUserId(newUserId);
-    res.json({
-        success: true,
-        message: `Test user ID set to ${newUserId}`
+// New route to set test user ID
+app.get("/set-test-user/:userId", (req, res) => {
+  const newUserId = parseInt(req.params.userId);
+
+  if (isNaN(newUserId)) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: "Invalid user ID provided",
+      },
     });
+  }
+
+  setTestUserId(newUserId);
+  res.json({
+    success: true,
+    message: `Test user ID set to ${newUserId}`,
+  });
 });
 
 // Routes
@@ -117,15 +126,15 @@ app.use(addTestUser);
 
 app.use("/api", userRoutes);
 app.use("/api", trustRoutes);
-app.use("/", addTestUser,statusRoutes);
-app.use("/",addTestUser, trustedRoutes);
-app.use("/",addTestUser, trustingRoutes);
-app.use("/",addTestUser, trustingList2Routes);
-// app.use("/", blockedRoutes);
-// app.use("/", blockedMeRoutes);
-// app.use("/", ignoredRoutes);
-// app.use("/", connectedRoutes);
-// app.use("/", updateStatusRoutes);
+app.use("/", addTestUser, statusRoutes);
+app.use("/", addTestUser, trustedRoutes);
+app.use("/", addTestUser, trustingRoutes);
+app.use("/", addTestUser, trustingList2Routes);
+app.use("/", addTestUser, blockedRoutes);
+app.use("/", addTestUser, blockedMeRoutes);
+app.use("/", addTestUser, ignoredRoutes);
+app.use("/", addTestUser, connectedRoutes);
+app.use("/", addTestUser, updateStatusRoutes);
 
 // Start server and connect to database
 app.listen(port, "0.0.0.0", () => {

@@ -1,8 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { updateStatus } = require('../controllers/updateStatusController');
+const { updateStatus } = require("../controllers/updateStatusController");
 
-// POST /usertrust/update-status/:status/:stranger-id
-router.post('/usertrust/update-status/:status/:strangerId', updateStatus);
+router.post("/usertrust/update-status/:status/:strangerid", updateStatus);
 
 module.exports = router;
